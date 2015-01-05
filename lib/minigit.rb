@@ -176,7 +176,7 @@ class MiniGit
     
     if @ssh_key
       gem_root = Gem::Specification.find_by_name("minigit").gem_dir
-      ENV['GIT_SSH'] = File.join(gem_root, "ssh-git.sh")
+      ENV['GIT_SSH'] = File.join(gem_root, 'bin', 'ssh-git.sh')
       ENV['MINIGIT_SSH_KEY'] = @ssh_key
     end
     
