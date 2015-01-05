@@ -45,12 +45,14 @@ class MiniGit
     end
   end
 
+  attr_accessor :ssh_key
   attr_writer :git_command
   attr_reader :git_dir, :git_work_tree
 
   def git_command
     @git_command || self.class.git_command
   end
+  
 
   def find_git_dir(where)
     path = Pathname.new(where)
@@ -170,12 +172,21 @@ class MiniGit
   private
 
   def with_git_env
-    dir, work_tree = ENV['GIT_DIR'], ENV['GIT_WORK_TREE']
+    dir, work_tree, git_ssh = ENV['GIT_DIR'], ENV['GIT_WORK_TREE'], ENV['GIT_SSH']
+    
+    if @ssh_key
+      gem_root = Gem::Specification.find_by_name("minigit").gem_dir
+      ENV['GIT_SSH'] = File.join(gem_root, "ssh-git.sh")
+      ENV['MINIGIT_SSH_KEY'] = @ssh_key
+    end
+    
     ENV['GIT_DIR'] = git_dir
     ENV['GIT_WORK_TREE'] = git_work_tree
     yield
   ensure
     if dir then ENV['GIT_DIR'] = dir else ENV.delete('GIT_DIR') end
     if work_tree then ENV['GIT_WORK_TREE'] = work_tree else ENV.delete('GIT_WORK_TREE') end
+    if git_ssh then ENV['GIT_SSH'] = git_ssh else ENV.delete('GIT_SSH') end
+    ENV.delete('MINIGIT_SSH_KEY')
   end
 end
